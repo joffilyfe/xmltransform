@@ -7,7 +7,6 @@ import tempfile
 from typing import Dict, List, Union
 from pathlib import Path
 
-import encoding
 from exceptions import DoesNotExist
 
 
@@ -38,6 +37,28 @@ def format_value(content):
     except TypeError:
         content = ", ".join(content)
     return remove_break_lines_characters(content).strip().replace("^", PRESERVECIRC)
+
+
+def _decode(content, encoding="utf-8"):
+    try:
+        content = content.decode(encoding)
+    except AttributeError:
+        return content
+    return content
+
+
+def _encode(content, encoding="utf-8"):
+    """
+    No python 3, converte string para bytes
+    No python 2, converte unicode para string
+    """
+    try:
+        _content = content.encode(encoding)
+    except AttributeError:
+        return content
+    except UnicodeEncodeError:
+        _content = content.encode(encoding, "xmlcharrefreplace")
+    return _content
 
 
 class IDFile:
@@ -156,7 +177,7 @@ class IDFile:
     def read(self, filename):
         rec_list = []
         iso_content = read_file(filename, "iso-8859-1")
-        utf8_content = encoding.decode(iso_content)
+        utf8_content = _decode(iso_content)
         utf8_content = html.unescape(utf8_content)
         utf8_content = utf8_content.replace("\\^", PRESERVECIRC)
 
@@ -177,8 +198,8 @@ class IDFile:
 
         # converterá a entidades, os caracteres utf-8 que não tem
         # correspondencia em iso-8859-1
-        content = encoding.encode(content, "iso-8859-1")
-        content = encoding.decode(content, "iso-8859-1")
+        content = _encode(content, "iso-8859-1")
+        content = _decode(content, "iso-8859-1")
 
         try:
             # write_file(filename, content, "iso-8859-1")

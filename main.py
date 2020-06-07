@@ -1,5 +1,4 @@
 import abc
-import sys
 import logging
 import enum
 
@@ -9,11 +8,6 @@ from typing import (
     List,
     Dict,
     Union,
-    Sequence,
-    Mapping,
-    TypeVar,
-    Tuple,
-    Type,
     Optional,
     NamedTuple,
 )
@@ -21,16 +15,13 @@ from typing import (
 from isisinterface import UCISIS
 
 logging.basicConfig(format=u"%(asctime)s %(levelname)-5.5s [%(name)s] %(message)s",)
-logger = logging.getLogger()
-logger.setLevel("INFO")
-
-
-Record = Dict[str, Union[str, list]]
-Records = List[Record]
+LOGGER = logging.getLogger()
+LOGGER.setLevel("INFO")
 
 
 class ValidationSeverityError(enum.Enum):
     """Enum with severity of errors"""
+
     Warning = enum.auto()
     Blocking = enum.auto()
     Fatal = enum.auto()
@@ -42,14 +33,16 @@ class ValidationDict(NamedTuple):
     severity: ValidationSeverityError
 
 
-ValidationResult = Union[ValidationDict, None]
+ValidationResult = Optional[ValidationDict]
+Record = Dict[str, Union[str, list]]
+Records = List[Record]
 
 
 class ISISDatabase(abc.ABC):
     @abc.abstractmethod
     def search(self, **kwargs) -> Records:
         """Search for records into ISIS Database.
-        
+
         It uses the UCISIS interfaces to access MX power"""
         raise NotImplementedError
 
@@ -167,4 +160,4 @@ if __name__ == "__main__":
             continue
 
         if result.severity == ValidationSeverityError.Blocking:
-            logger.error("Could not convert this article, reason '%s'.", result.reason)
+            LOGGER.error("Could not convert this article, reason '%s'.", result.reason)
