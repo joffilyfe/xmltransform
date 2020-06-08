@@ -27,13 +27,13 @@ class ValidationSeverityError(enum.Enum):
     Fatal = enum.auto()
 
 
-class ValidationDict(NamedTuple):
+class ValidatioNamedTuple(NamedTuple):
     failed: bool
     reason: str
     severity: ValidationSeverityError
 
 
-ValidationResult = Optional[ValidationDict]
+ValidationResult = Optional[ValidatioNamedTuple]
 Record = Dict[str, Union[str, list]]
 Records = List[Record]
 
@@ -82,7 +82,7 @@ class ArticleTitleValidation(Validation):
         title: str = kwargs.get("title", "")
 
         if len(title.strip()) == 0:
-            return ValidationDict(
+            return ValidatioNamedTuple(
                 failed=True, reason="Title cannot be blank", severity=self.severity
             )
 
@@ -99,7 +99,7 @@ class ArticleAuthorsValidation(Validation):
         authors: str = kwargs.get("article", {}).get("authors", [])
 
         if len(authors) == 0:
-            return ValidationDict(
+            return ValidatioNamedTuple(
                 failed=True,
                 reason="The article shoud have at least one author",
                 severity=self.severity,
