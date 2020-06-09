@@ -27,13 +27,12 @@ class ValidationSeverityError(enum.Enum):
     Fatal = enum.auto()
 
 
-class ValidatioNamedTuple(NamedTuple):
-    failed: bool
-    reason: str
+class ValidationError(NamedTuple):
+    error: str
     severity: ValidationSeverityError
 
 
-ValidationResult = Optional[ValidatioNamedTuple]
+ValidationResult = Optional[ValidationError]
 Record = Dict[str, Union[str, list]]
 Records = List[Record]
 
@@ -82,8 +81,8 @@ class ArticleTitleValidation(Validation):
         title: str = kwargs.get("title", "")
 
         if len(title.strip()) == 0:
-            return ValidatioNamedTuple(
-                failed=True, reason="Title cannot be blank", severity=self.severity
+            return ValidationError(
+                error="Title cannot be blank", severity=self.severity
             )
 
         return None
@@ -99,9 +98,8 @@ class ArticleAuthorsValidation(Validation):
         authors: str = kwargs.get("article", {}).get("authors", [])
 
         if len(authors) == 0:
-            return ValidatioNamedTuple(
-                failed=True,
-                reason="The article shoud have at least one author",
+            return ValidationError(
+                error="The article shoud have at least one author",
                 severity=self.severity,
             )
 
@@ -138,7 +136,7 @@ if __name__ == "__main__":
     # Artigo transformado em objeto python
     # As validações to packtools são executadas
     # Validações (Validation) são executadas [lista]
-    # O resultado das validações é observável por uma estrutura de chave-valor
+    # O resultado das validações é observável por uma estrutura de tupla nomeada
     # O artigo é transformado em base mst / id
 
     article_validations: List[Validation] = [
@@ -160,4 +158,4 @@ if __name__ == "__main__":
             continue
 
         if result.severity == ValidationSeverityError.Blocking:
-            LOGGER.error("Could not convert this article, reason '%s'.", result.reason)
+            LOGGER.error("Could not convert this article, reason '%s'.", result.error)
